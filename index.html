@@ -34,18 +34,13 @@
   .sync-dot.loading { background:var(--blue);   animation:pulse .8s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-  /* ── Hamburger button ── */
+  /* ── Hamburger ── */
   .hamburger {
-    display:none;
-    flex-direction:column; justify-content:center; align-items:center; gap:5px;
+    display:none; flex-direction:column; justify-content:center; align-items:center; gap:5px;
     width:40px; height:40px; cursor:pointer; background:var(--bg3);
-    border:1px solid var(--border); border-radius:var(--radius);
-    flex-shrink:0;
+    border:1px solid var(--border); border-radius:var(--radius); flex-shrink:0;
   }
-  .hamburger span {
-    display:block; width:18px; height:2px; background:var(--text);
-    border-radius:2px; transition:transform .2s, opacity .2s;
-  }
+  .hamburger span { display:block; width:18px; height:2px; background:var(--text); border-radius:2px; transition:transform .2s,opacity .2s; }
   .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
   .hamburger.open span:nth-child(2) { opacity:0; }
   .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
@@ -53,7 +48,7 @@
   /* ── Layout ── */
   .layout { display:flex; height:calc(100vh - 56px); }
 
-  /* ── Desktop sidebar nav ── */
+  /* ── Desktop sidebar ── */
   nav {
     width:200px; flex-shrink:0; background:var(--bg2);
     border-right:1px solid var(--border); padding:16px 0;
@@ -63,25 +58,19 @@
   .nav-item {
     display:flex; align-items:center; gap:8px; padding:8px 16px;
     cursor:pointer; color:var(--muted); font-size:13px; font-weight:500;
-    border-left:2px solid transparent;
-    transition:color .15s, background .15s, border-color .15s; user-select:none;
+    border-left:2px solid transparent; transition:color .15s,background .15s,border-color .15s; user-select:none;
   }
   .nav-item:hover  { color:var(--text); background:var(--bg3); }
   .nav-item.active { color:var(--accent); border-left-color:var(--accent); background:var(--bg3); }
   .dot { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
 
   /* ── Mobile drawer ── */
-  .mobile-drawer {
-    display:none;
-    position:fixed; top:56px; left:0; right:0; bottom:0;
-    background:rgba(0,0,0,.6); z-index:90;
-  }
+  .mobile-drawer { display:none; position:fixed; top:56px; left:0; right:0; bottom:0; background:rgba(0,0,0,.6); z-index:90; }
   .mobile-drawer.open { display:block; }
   .drawer-panel {
     position:absolute; top:0; left:0; width:240px; bottom:0;
     background:var(--bg2); border-right:1px solid var(--border);
-    padding:16px 0; display:flex; flex-direction:column; gap:2px;
-    overflow-y:auto;
+    padding:16px 0; display:flex; flex-direction:column; gap:2px; overflow-y:auto;
     transform:translateX(-100%); transition:transform .22s ease;
   }
   .mobile-drawer.open .drawer-panel { transform:translateX(0); }
@@ -96,9 +85,7 @@
 
   /* ── Banners ── */
   .banner { border-radius:var(--radius); padding:12px 14px; margin-bottom:16px; font-size:13px; line-height:1.6; display:flex; align-items:flex-start; gap:10px; }
-  .banner-warn { background:rgba(224,123,42,.1); border:1px solid rgba(224,123,42,.35); color:var(--accent); }
-  .banner-err  { background:rgba(217,95,95,.1);  border:1px solid rgba(217,95,95,.35);  color:var(--red); }
-  .banner code { font-family:monospace; background:rgba(255,255,255,.08); padding:1px 5px; border-radius:3px; font-size:12px; }
+  .banner-err { background:rgba(217,95,95,.1); border:1px solid rgba(217,95,95,.35); color:var(--red); }
 
   /* ── Stats bar ── */
   .stats-bar { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; margin-bottom:18px; }
@@ -128,16 +115,42 @@
   .btn-sm { height:28px; padding:4px 10px; font-size:12px; }
   .btn-ghost { background:transparent; border-color:transparent; color:var(--muted); }
   .btn-ghost:hover { color:var(--text); background:var(--bg3); border-color:var(--border); }
+  .btn-danger { background:transparent; border-color:transparent; color:var(--red); }
+  .btn-danger:hover { background:rgba(217,95,95,.12); border-color:rgba(217,95,95,.3); }
 
   /* ── Table ── */
   .table-wrap { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; table-layout:fixed; min-width:600px; }
+  table { width:100%; border-collapse:collapse; table-layout:fixed; min-width:520px; }
   th { font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:10px 12px; text-align:left; background:var(--bg3); border-bottom:1px solid var(--border); white-space:nowrap; }
   td { padding:10px 12px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
-  tr:last-child td { border-bottom:none; }
-  tr:hover td { background:rgba(255,255,255,.025); }
+
+  /* ── Lead rows ── */
+  .lead-row { cursor:pointer; transition:background .12s; }
+  .lead-row:hover td { background:rgba(255,255,255,.03); }
+  .lead-row.expanded td { background:rgba(224,123,42,.05); border-bottom:none; }
+  .lead-row td:first-child { border-left:2px solid transparent; }
+  .lead-row.expanded td:first-child { border-left-color:var(--accent); }
+
+  .expand-row { display:none; }
+  .expand-row.open { display:table-row; }
+  .expand-row td { padding:0; border-bottom:1px solid var(--border); background:rgba(224,123,42,.04); }
+  .expand-inner {
+    padding:16px 18px 18px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px 24px;
+  }
+  .expand-field { display:flex; flex-direction:column; gap:3px; }
+  .expand-label { font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--hint); }
+  .expand-value { font-size:13px; color:var(--text); word-break:break-word; }
+  .expand-notes { grid-column:1/-1; }
+  .expand-actions { grid-column:1/-1; display:flex; gap:8px; padding-top:4px; border-top:1px solid var(--border); margin-top:4px; }
+
   .lead-name { font-weight:600; font-size:14px; }
-  .lead-notes { font-size:12px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px; display:block; }
+  .lead-subtitle { font-size:12px; color:var(--muted); margin-top:1px; }
+  .expand-caret { font-size:10px; color:var(--hint); transition:transform .2s; display:inline-block; margin-left:4px; }
+  .lead-row.expanded .expand-caret { transform:rotate(180deg); }
+
   .td-muted { color:var(--muted); font-size:13px; }
   .due-soon { color:var(--red); font-weight:600; font-size:12px; }
   .due-ok   { color:var(--muted); font-size:12px; }
@@ -146,9 +159,8 @@
   /* ── Badges ── */
   .badge { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; padding:3px 8px; border-radius:3px; white-space:nowrap; }
   .b-New      { background:rgba(91,155,213,.15);  color:var(--blue);   border:1px solid rgba(91,155,213,.3); }
+  .b-WalkThru { background:rgba(212,168,39,.15);  color:var(--yellow); border:1px solid rgba(212,168,39,.3); }
   .b-Quoted   { background:rgba(155,142,212,.15); color:var(--purple); border:1px solid rgba(155,142,212,.3); }
-  .b-Followup { background:rgba(212,168,39,.15);  color:var(--yellow); border:1px solid rgba(212,168,39,.3); }
-  .b-Scheduled{ background:rgba(224,123,42,.15);  color:var(--accent); border:1px solid rgba(224,123,42,.3); }
   .b-Won      { background:rgba(76,175,125,.15);  color:var(--green);  border:1px solid rgba(76,175,125,.3); }
   .b-Lost     { background:rgba(217,95,95,.15);   color:var(--red);    border:1px solid rgba(217,95,95,.3); }
 
@@ -171,7 +183,7 @@
 
   /* ── Pipeline ── */
   #view-pipeline { display:none; }
-  .pipeline-board { display:grid; grid-template-columns:repeat(6,minmax(140px,1fr)); gap:10px; align-items:start; overflow-x:auto; }
+  .pipeline-board { display:grid; grid-template-columns:repeat(5,minmax(140px,1fr)); gap:10px; align-items:start; overflow-x:auto; }
   .pipeline-col { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; min-width:140px; }
   .pipeline-col-header { padding:10px 12px; background:var(--bg3); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
   .pipeline-count { background:var(--border); color:var(--muted); font-size:10px; font-weight:700; padding:2px 6px; border-radius:10px; }
@@ -188,50 +200,32 @@
   ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
   ::-webkit-scrollbar-thumb:hover{background:var(--muted)}
 
-  /* ════════════════════════════
-     MOBILE RESPONSIVE STYLES
-     ════════════════════════════ */
+  /* ── Mobile ── */
   @media (max-width: 768px) {
-    /* Show hamburger, hide sidebar */
     .hamburger { display:flex; }
     nav { display:none; }
-
-    /* Full-width main */
     main { padding:14px; }
-
-    /* Stats — 2 cols on mobile */
     .stats-bar { grid-template-columns:repeat(2,1fr); gap:8px; }
     .stats-bar .stat-card:last-child { grid-column:span 2; }
     .stat-val { font-size:22px; }
-
-    /* Toolbar — stack vertically */
     .toolbar { flex-direction:column; align-items:stretch; gap:8px; }
     .toolbar input[type=text] { width:100%; }
     .toolbar select { width:100%; }
     .toolbar .btn { width:100%; justify-content:center; }
-
-    /* Page header */
     .page-title { font-size:18px; }
-
-    /* Table — horizontal scroll on mobile, hide less-important cols */
     .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-    table { min-width:420px; }
+    table { min-width:380px; }
     .hide-mobile { display:none; }
-
-    /* Modal full-width on mobile */
-    .modal { width:100%; border-radius:8px; }
+    .modal { width:100%; }
     .field-row { grid-template-columns:1fr; }
-
-    /* Pipeline horizontal scroll */
-    .pipeline-board { grid-template-columns:repeat(6,minmax(160px,1fr)); }
-
-    /* Sync label hidden on small screens — just show dot */
+    .expand-inner { grid-template-columns:1fr 1fr; }
+    .pipeline-board { grid-template-columns:repeat(5,minmax(150px,1fr)); }
     #sync-label { display:none; }
   }
-
   @media (max-width: 480px) {
     .logo { font-size:16px; }
     .stats-bar { grid-template-columns:1fr 1fr; }
+    .expand-inner { grid-template-columns:1fr; }
   }
 </style>
 </head>
@@ -244,7 +238,6 @@
       <div class="sync-dot loading" id="sync-dot"></div>
       <span id="sync-label" style="color:var(--muted);font-size:12px;letter-spacing:.04em">Loading...</span>
     </div>
-    <!-- Hamburger (mobile only) -->
     <button class="hamburger" id="hamburger" onclick="toggleDrawer()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -259,9 +252,8 @@
     <div class="nav-item" onclick="mobileNav('pipeline',this,'pipeline')" data-view="pipeline">&#9636;&nbsp; Pipeline</div>
     <div class="nav-section">Filter by Status</div>
     <div class="nav-item" onclick="mobileFilter('New',this)"><span class="dot" style="background:var(--blue)"></span>&nbsp; New</div>
+    <div class="nav-item" onclick="mobileFilter('Walk Thru',this)"><span class="dot" style="background:var(--yellow)"></span>&nbsp; Walk Thru</div>
     <div class="nav-item" onclick="mobileFilter('Quoted',this)"><span class="dot" style="background:var(--purple)"></span>&nbsp; Quoted</div>
-    <div class="nav-item" onclick="mobileFilter('Follow-up',this)"><span class="dot" style="background:var(--yellow)"></span>&nbsp; Follow-up</div>
-    <div class="nav-item" onclick="mobileFilter('Scheduled',this)"><span class="dot" style="background:var(--accent)"></span>&nbsp; Scheduled</div>
     <div class="nav-item" onclick="mobileFilter('Won',this)"><span class="dot" style="background:var(--green)"></span>&nbsp; Won</div>
     <div class="nav-item" onclick="mobileFilter('Lost',this)"><span class="dot" style="background:var(--red)"></span>&nbsp; Lost</div>
     <div class="nav-item" onclick="mobileFilter('',this)"><span class="dot" style="background:var(--muted)"></span>&nbsp; All Leads</div>
@@ -279,9 +271,8 @@
     <div class="nav-item" onclick="switchView('pipeline',this)" data-view="pipeline">&#9636;&nbsp; Pipeline</div>
     <div class="nav-section">Filter</div>
     <div class="nav-item" onclick="quickFilter('New',this)"><span class="dot" style="background:var(--blue)"></span> New</div>
+    <div class="nav-item" onclick="quickFilter('Walk Thru',this)"><span class="dot" style="background:var(--yellow)"></span> Walk Thru</div>
     <div class="nav-item" onclick="quickFilter('Quoted',this)"><span class="dot" style="background:var(--purple)"></span> Quoted</div>
-    <div class="nav-item" onclick="quickFilter('Follow-up',this)"><span class="dot" style="background:var(--yellow)"></span> Follow-up</div>
-    <div class="nav-item" onclick="quickFilter('Scheduled',this)"><span class="dot" style="background:var(--accent)"></span> Scheduled</div>
     <div class="nav-item" onclick="quickFilter('Won',this)"><span class="dot" style="background:var(--green)"></span> Won</div>
     <div class="nav-item" onclick="quickFilter('Lost',this)"><span class="dot" style="background:var(--red)"></span> Lost</div>
     <div style="margin-top:auto"></div>
@@ -291,7 +282,6 @@
   </nav>
 
   <main>
-
     <!-- LEADS VIEW -->
     <div id="view-leads">
       <div class="page-header">
@@ -310,8 +300,8 @@
         <input type="text" id="search" placeholder="Search name, phone, notes..." oninput="renderLeads()">
         <select id="filter-status" onchange="renderLeads()">
           <option value="">All statuses</option>
-          <option>New</option><option>Quoted</option><option>Follow-up</option>
-          <option>Scheduled</option><option>Won</option><option>Lost</option>
+          <option>New</option><option>Walk Thru</option><option>Quoted</option>
+          <option>Won</option><option>Lost</option>
         </select>
         <select id="filter-type" onchange="renderLeads()">
           <option value="">All job types</option>
@@ -329,29 +319,25 @@
       <div class="table-wrap">
         <table>
           <colgroup>
-            <col style="width:190px">
-            <col style="width:120px" class="hide-mobile">
+            <col style="width:200px">
+            <col style="width:100px">
             <col style="width:130px" class="hide-mobile">
-            <col style="width:96px">
             <col style="width:100px" class="hide-mobile">
             <col style="width:96px" class="hide-mobile">
-            <col style="width:96px">
-            <col style="width:72px">
+            <col style="width:100px">
           </colgroup>
           <thead>
             <tr>
               <th>Customer</th>
-              <th class="hide-mobile">Phone</th>
-              <th class="hide-mobile">Job type</th>
               <th>Status</th>
-              <th class="hide-mobile">Est. value</th>
+              <th class="hide-mobile">Job Type</th>
+              <th class="hide-mobile">Est. Value</th>
               <th class="hide-mobile">Source</th>
-              <th>Follow-up</th>
-              <th></th>
+              <th>Next Deadline</th>
             </tr>
           </thead>
           <tbody id="leads-tbody">
-            <tr class="loading-row"><td colspan="8">Loading leads from Google Sheets...</td></tr>
+            <tr class="loading-row"><td colspan="6">Loading leads from Google Sheets...</td></tr>
           </tbody>
         </table>
         <div id="empty-state" class="empty" style="display:none">You currently have no leads.</div>
@@ -366,7 +352,6 @@
       </div>
       <div class="pipeline-board" id="pipeline-board"></div>
     </div>
-
   </main>
 </div>
 
@@ -395,8 +380,8 @@
         </div>
         <div class="field"><label>Status</label>
           <select id="f-status">
-            <option>New</option><option>Quoted</option><option>Follow-up</option>
-            <option>Scheduled</option><option>Won</option><option>Lost</option>
+            <option>New</option><option>Walk Thru</option><option>Quoted</option>
+            <option>Won</option><option>Lost</option>
           </select>
         </div>
       </div>
@@ -407,7 +392,7 @@
             <option>Google</option><option>Repeat customer</option><option>Other</option>
           </select>
         </div>
-        <div class="field"><label>Follow-up date</label><input type="date" id="f-followup"></div>
+        <div class="field"><label>Next deadline</label><input type="date" id="f-followup"></div>
       </div>
       <div class="field"><label>Address / location</label><input type="text" id="f-address" placeholder="Job site address"></div>
       <div class="field"><label>Notes</label><textarea id="f-notes" placeholder="Scope, specs, access notes, customer requests..."></textarea></div>
@@ -426,13 +411,12 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMamNP8KwJjBanablcGrJmkn8Bco_WOZrdgL-Uj8qqn0Ku0TuatDD_nzdxdKtgf0GqTw/exec";
 // ════════════════════════════════════════════════════════════════
 
-const STATUSES = ['New','Quoted','Follow-up','Scheduled','Won','Lost'];
+const STATUSES = ['New','Walk Thru','Quoted','Won','Lost'];
 const today    = new Date().toISOString().slice(0,10);
 let leads      = [];
 let editingId  = null;
 let isSaving   = false;
-
-
+let expandedId = null;
 
 // ── localStorage fallback ─────────────────────────────────────
 function loadLocal() { try { return JSON.parse(localStorage.getItem('mtj-leads')) || []; } catch(e) { return []; } }
@@ -442,7 +426,7 @@ function saveLocal() { try { localStorage.setItem('mtj-leads', JSON.stringify(le
 function setSyncStatus(state, text) {
   const dot   = document.getElementById('sync-dot');
   const label = document.getElementById('sync-label');
-  const map   = { live:'Synced', saving:'Saving...', loading:'Loading...', error:'Sheet error', local:'Local only' };
+  const map   = { live:'Synced', saving:'Saving...', loading:'Loading...', error:'Sheet error' };
   dot.className     = 'sync-dot ' + state;
   label.textContent = text || map[state] || state;
   label.style.color = state==='live' ? 'var(--green)' : state==='error' ? 'var(--red)' : 'var(--muted)';
@@ -467,8 +451,7 @@ async function loadLeads() {
   setSyncStatus('loading');
   document.getElementById('banner-error').style.display = 'none';
   try {
-    const data = await apiGet();
-    leads = data;
+    leads = await apiGet();
     setSyncStatus('live');
     document.getElementById('btn-add').disabled = false;
     renderLeads();
@@ -499,6 +482,7 @@ async function upsertLead(lead) {
 // ── Delete ────────────────────────────────────────────────────
 async function deleteLead(id) {
   if (!confirm('Remove this lead? This cannot be undone.')) return;
+  if (expandedId === id) expandedId = null;
   leads = leads.filter(l => l.id !== id);
   saveLocal();
   renderLeads();
@@ -513,9 +497,22 @@ async function deleteLead(id) {
 function genId()      { return 'lead_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
 function daysUntil(d) { if(!d) return null; return Math.ceil((new Date(d+' 00:00') - new Date()) / 86400000); }
 function fmt$(n)      { return n && Number(n) ? '$' + Number(n).toLocaleString() : '—'; }
-function fmtDate(d)   { if(!d) return ''; const [y,m,day]=d.split('-'); return m+'/'+day+'/'+y.slice(2); }
-function badgeCls(s)  { return 'b-' + s.replace(/[^a-z]/gi,''); }
+function fmtDate(d)   {
+  if(!d) return '';
+  // Handle both YYYY-MM-DD and any date string — always return MM/DD/YYYY, no time
+  const parts = d.split('T')[0].split('-');
+  if(parts.length === 3) return parts[1] + '/' + parts[2] + '/' + parts[0].slice(2);
+  return d;
+}
+function badgeCls(s)  { return 'b-' + s.replace(/[\s\-]/g,''); }
 function esc(s)       { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function orDash(s)    { return s ? esc(s) : '<span style="color:var(--hint)">—</span>'; }
+
+// ── Toggle expand ─────────────────────────────────────────────
+function toggleExpand(id) {
+  expandedId = expandedId === id ? null : id;
+  renderLeads();
+}
 
 // ── Stats ─────────────────────────────────────────────────────
 function renderStats() {
@@ -527,7 +524,7 @@ function renderStats() {
     <div class="stat-card"><div class="stat-label">Total</div><div class="stat-val">${leads.length}</div></div>
     <div class="stat-card"><div class="stat-label">Active</div><div class="stat-val accent">${active.length}</div></div>
     <div class="stat-card"><div class="stat-label">Won</div><div class="stat-val green">${won.length}</div></div>
-    <div class="stat-card"><div class="stat-label">Due</div><div class="stat-val ${dueNow.length?'red':''}">${dueNow.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Due Soon</div><div class="stat-val ${dueNow.length?'red':''}">${dueNow.length}</div></div>
     <div class="stat-card"><div class="stat-label">Pipeline</div><div class="stat-val" style="font-size:18px">$${pipeline.toLocaleString()}</div></div>
   `;
 }
@@ -552,7 +549,6 @@ function renderLeads() {
     return true;
   });
 
-  const tbody = document.getElementById('leads-tbody');
   const emptyEl = document.getElementById('empty-state');
   if (filtered.length === 0) {
     const hasFilters = search || fStatus || fType || fSource;
@@ -561,23 +557,72 @@ function renderLeads() {
   } else {
     emptyEl.style.display = 'none';
   }
+
+  const tbody = document.getElementById('leads-tbody');
   tbody.innerHTML = filtered.map(l=>{
-    const days   = daysUntil(l.followup);
-    const dueCls = days!==null&&days<=1&&!['Won','Lost'].includes(l.status)?'due-soon':'due-ok';
-    const dueText= l.followup ? `<span class="${dueCls}">${fmtDate(l.followup)}</span>` : '<span class="no-date">—</span>';
-    return `<tr>
-      <td><div class="lead-name">${esc(l.name)}</div><span class="lead-notes">${esc(l.notes)}</span></td>
-      <td class="td-muted hide-mobile">${esc(l.phone)}</td>
-      <td class="hide-mobile">${esc(l.type)}</td>
+    const days      = daysUntil(l.followup);
+    const isActive  = !['Won','Lost'].includes(l.status);
+    const dueCls    = days!==null&&days<=1&&isActive ? 'due-soon' : 'due-ok';
+    const dateText  = l.followup ? `<span class="${dueCls}">${fmtDate(l.followup)}</span>` : '<span class="no-date">—</span>';
+    const isExp     = expandedId === l.id;
+    const subtitle  = [l.type, l.phone].filter(Boolean).join(' · ');
+
+    const summaryRow = `<tr class="lead-row${isExp?' expanded':''}" onclick="toggleExpand('${l.id}')">
+      <td>
+        <div class="lead-name">${esc(l.name)} <span class="expand-caret">▼</span></div>
+        <div class="lead-subtitle">${esc(subtitle)}</div>
+      </td>
       <td><span class="badge ${badgeCls(l.status)}">${l.status}</span></td>
+      <td class="td-muted hide-mobile">${esc(l.type)}</td>
       <td class="td-muted hide-mobile">${fmt$(l.value)}</td>
       <td class="td-muted hide-mobile">${esc(l.source)}</td>
-      <td>${dueText}</td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-ghost btn-sm" onclick="openModal('${l.id}')" title="Edit">&#9998;</button>
-        <button class="btn btn-ghost btn-sm" onclick="deleteLead('${l.id}')" title="Delete" style="color:var(--red)">&#10007;</button>
+      <td>${dateText}</td>
+    </tr>`;
+
+    const detailRow = `<tr class="expand-row${isExp?' open':''}">
+      <td colspan="6">
+        <div class="expand-inner">
+          <div class="expand-field">
+            <div class="expand-label">Phone</div>
+            <div class="expand-value">${orDash(l.phone)}</div>
+          </div>
+          <div class="expand-field">
+            <div class="expand-label">Email</div>
+            <div class="expand-value">${orDash(l.email)}</div>
+          </div>
+          <div class="expand-field">
+            <div class="expand-label">Est. Value</div>
+            <div class="expand-value">${fmt$(l.value)}</div>
+          </div>
+          <div class="expand-field">
+            <div class="expand-label">Job Type</div>
+            <div class="expand-value">${orDash(l.type)}</div>
+          </div>
+          <div class="expand-field">
+            <div class="expand-label">Lead Source</div>
+            <div class="expand-value">${orDash(l.source)}</div>
+          </div>
+          <div class="expand-field">
+            <div class="expand-label">Next Deadline</div>
+            <div class="expand-value">${l.followup ? fmtDate(l.followup) : '—'}</div>
+          </div>
+          <div class="expand-field expand-notes">
+            <div class="expand-label">Address</div>
+            <div class="expand-value">${orDash(l.address)}</div>
+          </div>
+          <div class="expand-field expand-notes">
+            <div class="expand-label">Notes</div>
+            <div class="expand-value">${orDash(l.notes)}</div>
+          </div>
+          <div class="expand-actions">
+            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();openModal('${l.id}')">&#9998; Edit Lead</button>
+            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteLead('${l.id}')">&#10007; Delete</button>
+          </div>
+        </div>
       </td>
     </tr>`;
+
+    return summaryRow + detailRow;
   }).join('');
 
   renderStats();
@@ -665,10 +710,10 @@ async function saveLead() {
   btn.disabled = false; btn.textContent = 'Save Lead';
 }
 
-// ── Desktop nav ───────────────────────────────────────────────
+// ── Nav ───────────────────────────────────────────────────────
 function switchView(view, el) {
-  document.getElementById('view-leads').style.display    = view==='leads'    ? 'block' : 'none';
-  document.getElementById('view-pipeline').style.display = view==='pipeline' ? 'block' : 'none';
+  document.getElementById('view-leads').style.display    = view==='leads'    ? 'block':'none';
+  document.getElementById('view-pipeline').style.display = view==='pipeline' ? 'block':'none';
   if(el){ document.querySelectorAll('[data-view]').forEach(n=>n.classList.remove('active')); el.classList.add('active'); }
 }
 function quickFilter(status, el) {
@@ -692,9 +737,7 @@ function closeDrawer() {
   document.getElementById('hamburger').classList.remove('open');
   document.body.style.overflow = '';
 }
-function closeDrawerOutside(e) {
-  if(e.target === document.getElementById('mobile-drawer')) closeDrawer();
-}
+function closeDrawerOutside(e) { if(e.target===document.getElementById('mobile-drawer')) closeDrawer(); }
 function mobileNav(view, el, viewName) {
   document.querySelectorAll('.drawer-panel .nav-item').forEach(n=>n.classList.remove('active'));
   el.classList.add('active');
@@ -710,7 +753,7 @@ function mobileFilter(status, el) {
   closeDrawer();
 }
 
-// ── Filters ───────────────────────────────────────────────────
+// ── Filters / export ──────────────────────────────────────────
 function clearFilters() {
   document.getElementById('search').value='';
   document.getElementById('filter-status').value='';
@@ -718,8 +761,6 @@ function clearFilters() {
   document.getElementById('filter-source').value='';
   renderLeads();
 }
-
-// ── Export CSV ────────────────────────────────────────────────
 function exportCSV() {
   const cols = ['id','name','phone','email','value','type','status','source','followup','address','notes'];
   const rows = [cols.join(','), ...leads.map(l=>cols.map(c=>`"${String(l[c]||'').replace(/"/g,'""')}"`).join(','))];

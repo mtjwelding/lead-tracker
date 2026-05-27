@@ -354,7 +354,7 @@
             <tr class="loading-row"><td colspan="8">Loading leads from Google Sheets...</td></tr>
           </tbody>
         </table>
-        <div id="empty-state" class="empty" style="display:none">No leads match your filters.</div>
+        <div id="empty-state" class="empty" style="display:none">You currently have no leads.</div>
       </div>
     </div>
 
@@ -432,17 +432,10 @@ let leads      = [];
 let editingId  = null;
 let isSaving   = false;
 
-const DEFAULT_LEADS = [
-  {id:'lead1',name:'Dave Henriksen',phone:'801-555-0142',email:'',value:'1850',type:'Gate operator',status:'Quoted',source:'Referral',followup:'2026-05-29',address:'4421 S Redwood Rd, SLC',notes:'LiftMaster LA500, double driveway, existing posts'},
-  {id:'lead2',name:'Sarah Talmage',phone:'801-555-0387',email:'stalmage@email.com',value:'620',type:'Handrail',status:'Scheduled',source:'Lawn sign',followup:'2026-06-02',address:'882 E 400 N, Bountiful',notes:'3 steps, front porch, black powder coat'},
-  {id:'lead3',name:'Rio Verde HOA',phone:'801-555-0219',email:'manager@rioverde.org',value:'4200',type:'Gate fabrication',status:'New',source:'Google',followup:'2026-05-27',address:'Rio Verde Dr, Draper',notes:'Slide gate 16 ft, needs keypad'},
-  {id:'lead4',name:'Mike Parson',phone:'801-555-0091',email:'',value:'3100',type:'Fence',status:'Won',source:'Repeat customer',followup:'',address:'1204 N Main St, Brigham City',notes:'120 ft cedar privacy fence, 6 ft height'},
-  {id:'lead5',name:'Lori Ashby',phone:'801-555-0654',email:'loriashby@email.com',value:'480',type:'Handrail',status:'Lost',source:'Social media',followup:'',address:'',notes:'Went with another contractor on price'},
-  {id:'lead6',name:'Canyon View Apts',phone:'801-555-0773',email:'',value:'2800',type:'Gate operator',status:'Follow-up',source:'Referral',followup:'2026-05-28',address:'900 Canyon View Dr, Ogden',notes:'Two swing gates, LiftMaster CSW200, needs intercom'},
-];
+
 
 // ── localStorage fallback ─────────────────────────────────────
-function loadLocal() { try { return JSON.parse(localStorage.getItem('mtj-leads')) || DEFAULT_LEADS; } catch(e) { return DEFAULT_LEADS; } }
+function loadLocal() { try { return JSON.parse(localStorage.getItem('mtj-leads')) || []; } catch(e) { return []; } }
 function saveLocal() { try { localStorage.setItem('mtj-leads', JSON.stringify(leads)); } catch(e) {} }
 
 // ── Sync status ───────────────────────────────────────────────
@@ -475,8 +468,7 @@ async function loadLeads() {
   document.getElementById('banner-error').style.display = 'none';
   try {
     const data = await apiGet();
-    leads = data.length === 0 ? DEFAULT_LEADS : data;
-    if (data.length === 0) await apiFetch({ action:'seed', leads:DEFAULT_LEADS });
+    leads = data;
     setSyncStatus('live');
     document.getElementById('btn-add').disabled = false;
     renderLeads();
@@ -561,7 +553,14 @@ function renderLeads() {
   });
 
   const tbody = document.getElementById('leads-tbody');
-  document.getElementById('empty-state').style.display = filtered.length ? 'none' : 'block';
+  const emptyEl = document.getElementById('empty-state');
+  if (filtered.length === 0) {
+    const hasFilters = search || fStatus || fType || fSource;
+    emptyEl.textContent = hasFilters ? 'No leads match your filters.' : 'You currently have no leads.';
+    emptyEl.style.display = 'block';
+  } else {
+    emptyEl.style.display = 'none';
+  }
   tbody.innerHTML = filtered.map(l=>{
     const days   = daysUntil(l.followup);
     const dueCls = days!==null&&days<=1&&!['Won','Lost'].includes(l.status)?'due-soon':'due-ok';

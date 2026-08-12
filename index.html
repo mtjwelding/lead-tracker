@@ -204,6 +204,32 @@
     .stats-bar { grid-template-columns:1fr 1fr; }
     .expand-grid { grid-template-columns:1fr; }
   }
+
+  /* ── Photo modal ── */
+  .photo-modal { width:680px; }
+  .photo-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; padding:16px 20px; min-height:120px; }
+  .photo-thumb { position:relative; border-radius:var(--radius); overflow:hidden; aspect-ratio:1; background:var(--bg3); border:1px solid var(--border); cursor:pointer; }
+  .photo-thumb img { width:100%; height:100%; object-fit:cover; display:block; transition:opacity .2s; }
+  .photo-thumb:hover img { opacity:.8; }
+  .photo-del { position:absolute; top:5px; right:5px; background:rgba(0,0,0,.7); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .15s; }
+  .photo-thumb:hover .photo-del { opacity:1; }
+  .photo-empty { padding:40px 20px; text-align:center; color:var(--hint); font-size:13px; }
+  .photo-upload-area { margin:0 20px 16px; border:2px dashed var(--border2); border-radius:var(--radius); padding:20px; text-align:center; cursor:pointer; transition:border-color .2s,background .2s; }
+  .photo-upload-area:hover,.photo-upload-area.dragover { border-color:var(--accent); background:rgba(224,123,42,.06); }
+  .photo-upload-area input[type=file] { display:none; }
+  .photo-upload-label { color:var(--muted); font-size:13px; line-height:1.6; }
+  .photo-upload-label strong { color:var(--accent); }
+  .photo-progress { margin:0 20px 12px; }
+  .progress-bar-wrap { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:6px; }
+  .progress-bar-fill { height:100%; background:var(--accent); border-radius:2px; transition:width .2s; width:0%; }
+  .photo-footer { padding:12px 20px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .photo-drive-link { font-size:12px; color:var(--muted); text-decoration:none; }
+  .photo-drive-link:hover { color:var(--accent); }
+  @media(max-width:768px) {
+    .photo-modal { width:100%; }
+    .photo-grid { grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); }
+    .photo-del { opacity:1; }
+  }
 </style>
 </head>
 <body>
@@ -663,6 +689,7 @@ function renderLeads() {
           </div>
           <div class="expand-actions">
             <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();openModal('${l.id}')">&#9998; Edit Lead</button>
+            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();openPhotos('${l.id}')">&#128247; Photos</button>
             <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteLead('${l.id}')">&#10007; Delete</button>
           </div>
         </div>
@@ -752,6 +779,7 @@ async function saveLead() {
     followup:    document.getElementById('f-followup').value,
     deposit:     document.getElementById('f-deposit').value,
     depositdate: document.getElementById('f-depositdate').value,
+    photofolder: editingId ? (leads.find(l=>l.id===editingId)?.photofolder||'') : '',
   };
 
   if(editingId) {
@@ -832,6 +860,202 @@ document.addEventListener('keydown', e=>{
 });
 
 loadLeads();
+
+// ════════════════════════════════════════════════════════════════
+//  PHOTO MANAGEMENT
+// ════════════════════════════════════════════════════════════════
+let currentPhotoLeadId   = null;
+let currentPhotoLeadName = null;
+let currentFolderUrl     = null;
+let currentPhotos        = [];
+
+async function openPhotos(leadId) {
+  const lead = leads.find(l => l.id === leadId);
+  currentPhotoLeadId   = leadId;
+  currentPhotoLeadName = lead?.name || leadId;
+  currentPhotos        = [];
+
+  document.getElementById('photo-modal-title').textContent = (lead?.name || 'Lead') + ' — Photos';
+  document.getElementById('photo-modal-overlay').classList.add('open');
+  document.getElementById('photo-progress').style.display = 'none';
+  renderPhotoGrid([]);
+  setPhotoGridMessage('Loading photos...');
+
+  try {
+    const res  = await fetch(SCRIPT_URL + '?action=photos&leadId=' + encodeURIComponent(leadId) + '&leadName=' + encodeURIComponent(currentPhotoLeadName) + '&t=' + Date.now());
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    currentPhotos  = json.data.photos || [];
+    currentFolderUrl = json.data.folderUrl || '#';
+    document.getElementById('photo-drive-link').href = currentFolderUrl;
+    renderPhotoGrid(currentPhotos);
+  } catch(e) {
+    setPhotoGridMessage('Could not load photos: ' + e.message);
+  }
+}
+
+function renderPhotoGrid(photos) {
+  const grid = document.getElementById('photo-grid');
+  if (!photos || photos.length === 0) {
+    grid.innerHTML = '<div class="photo-empty" style="grid-column:1/-1">No photos yet. Tap above to add some.</div>';
+    return;
+  }
+  grid.innerHTML = photos.map(p => `
+    <div class="photo-thumb" id="thumb-${p.id}">
+      <img src="${p.thumb}" alt="${esc(p.name)}" loading="lazy" onclick="openLightbox('${p.url}')">
+      <button class="photo-del" onclick="deletePhoto('${p.id}',event)" title="Delete photo">&#10005;</button>
+    </div>
+  `).join('');
+}
+
+function setPhotoGridMessage(msg) {
+  document.getElementById('photo-grid').innerHTML = `<div class="photo-empty" style="grid-column:1/-1">${msg}</div>`;
+}
+
+function closePhotoModal() { document.getElementById('photo-modal-overlay').classList.remove('open'); }
+function closePhotoModalOutside(e) { if(e.target === document.getElementById('photo-modal-overlay')) closePhotoModal(); }
+
+// ── Drag & drop ───────────────────────────────────────────────
+function dragOver(e)  { e.preventDefault(); document.getElementById('upload-drop-zone').classList.add('dragover'); }
+function dragLeave(e) { document.getElementById('upload-drop-zone').classList.remove('dragover'); }
+function dropFiles(e) {
+  e.preventDefault();
+  document.getElementById('upload-drop-zone').classList.remove('dragover');
+  uploadFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
+}
+function handleFileSelect(e) { uploadFiles(Array.from(e.target.files)); e.target.value = ''; }
+
+// ── Upload ────────────────────────────────────────────────────
+async function uploadFiles(files) {
+  if (!files.length) return;
+  const prog      = document.getElementById('photo-progress');
+  const bar       = document.getElementById('progress-bar');
+  const label     = document.getElementById('progress-label');
+  prog.style.display = 'block';
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    label.textContent = `Uploading ${i + 1} of ${files.length}: ${file.name}`;
+    bar.style.width   = Math.round(((i) / files.length) * 100) + '%';
+
+    try {
+      const b64  = await fileToBase64(file);
+      const res  = await fetch(SCRIPT_URL + '?t=' + Date.now(), {
+        method: 'POST',
+        body: JSON.stringify({
+          action:   'uploadPhoto',
+          leadId:   currentPhotoLeadId,
+          leadName: currentPhotoLeadName,
+          filename: file.name,
+          mimeType: file.type || 'image/jpeg',
+          data:     b64,
+        })
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+
+      const photo = { id: json.data.fileId, name: file.name, url: json.data.url, thumb: json.data.thumb };
+      currentPhotos.push(photo);
+      currentFolderUrl = json.data.folderUrl || currentFolderUrl;
+      document.getElementById('photo-drive-link').href = currentFolderUrl;
+
+      // Update lead's photofolder locally
+      const lead = leads.find(l => l.id === currentPhotoLeadId);
+      if (lead) { lead.photofolder = currentFolderUrl; saveLocal(); }
+
+      renderPhotoGrid(currentPhotos);
+    } catch(e) {
+      label.textContent = 'Failed: ' + e.message;
+      await new Promise(r => setTimeout(r, 1500));
+    }
+  }
+
+  bar.style.width   = '100%';
+  label.textContent = files.length === 1 ? 'Upload complete.' : `${files.length} photos uploaded.`;
+  setTimeout(() => { prog.style.display = 'none'; bar.style.width = '0%'; }, 2000);
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Delete photo ──────────────────────────────────────────────
+async function deletePhoto(fileId, e) {
+  e.stopPropagation();
+  if (!confirm('Delete this photo? This cannot be undone.')) return;
+  const thumb = document.getElementById('thumb-' + fileId);
+  if (thumb) thumb.style.opacity = '0.4';
+  try {
+    const res  = await fetch(SCRIPT_URL + '?t=' + Date.now(), {
+      method: 'POST',
+      body: JSON.stringify({ action: 'deletePhoto', fileId })
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    currentPhotos = currentPhotos.filter(p => p.id !== fileId);
+    renderPhotoGrid(currentPhotos);
+  } catch(err) {
+    if (thumb) thumb.style.opacity = '1';
+    alert('Could not delete photo: ' + err.message);
+  }
+}
+
+// ── Lightbox ──────────────────────────────────────────────────
+function openLightbox(url) {
+  document.getElementById('lightbox-img').src = url;
+  const lb = document.getElementById('lightbox');
+  lb.style.display = 'flex';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').style.display = 'none';
+  document.getElementById('lightbox-img').src = '';
+}
 </script>
+
+<!-- ── PHOTO MODAL ── -->
+<div class="modal-overlay" id="photo-modal-overlay" onclick="closePhotoModalOutside(event)">
+  <div class="modal photo-modal">
+    <div class="modal-header">
+      <div class="modal-title" id="photo-modal-title">Photos</div>
+      <button class="btn btn-ghost btn-sm" onclick="closePhotoModal()">&#10005;</button>
+    </div>
+
+    <div class="photo-upload-area" id="upload-drop-zone"
+         onclick="document.getElementById('photo-file-input').click()"
+         ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFiles(event)">
+      <input type="file" id="photo-file-input" multiple accept="image/*" capture="environment" onchange="handleFileSelect(event)">
+      <div class="photo-upload-label">
+        <div style="font-size:28px;margin-bottom:6px">&#128247;</div>
+        <strong>Tap to add photos</strong> or drag &amp; drop<br>
+        <span style="font-size:12px">JPG, PNG, HEIC &middot; Multiple files OK &middot; 50MB max per upload</span>
+      </div>
+    </div>
+
+    <div class="photo-progress" id="photo-progress" style="display:none">
+      <div style="font-size:12px;color:var(--muted)" id="progress-label">Uploading...</div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar"></div></div>
+    </div>
+
+    <div class="photo-grid" id="photo-grid">
+      <div class="photo-empty" style="grid-column:1/-1">Loading photos...</div>
+    </div>
+
+    <div class="photo-footer">
+      <a id="photo-drive-link" class="photo-drive-link" href="#" target="_blank">&#128193; Open folder in Google Drive</a>
+      <button class="btn btn-sm" onclick="closePhotoModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Full-size lightbox -->
+<div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:300;align-items:center;justify-content:center;cursor:zoom-out" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" style="max-width:96vw;max-height:92vh;border-radius:4px;object-fit:contain">
+</div>
+
 </body>
 </html>

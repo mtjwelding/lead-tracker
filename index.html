@@ -573,7 +573,7 @@ function renderLeads() {
     const depositBadge = l.deposit==='Yes'
       ? `<span class="deposit-yes">&#10003; ${l.depositdate ? fmtDate(l.depositdate) : 'Yes'}</span>`
       : `<span class="deposit-no">No</span>`;
-    const subtitle = [l.type, l.phone].filter(Boolean).join(' · ');
+    const subtitle = l.phone || '';
 
     const summaryRow = `<tr class="lead-row${isExp?' expanded':''}" onclick="toggleExpand('${l.id}')">
       <td>

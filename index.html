@@ -448,6 +448,7 @@
 //  CONFIGURATION
 // ════════════════════════════════════════════════════════════════
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMamNP8KwJjBanablcGrJmkn8Bco_WOZrdgL-Uj8qqn0Ku0TuatDD_nzdxdKtgf0GqTw/exec";
+const PHOTO_URL  = "https://script.google.com/macros/s/AKfycbxxso_PF61unU1BB-Aii2EfrfvxDoU0f0b1hmfC-ExrfV8cQZ7MM0mM0TvCmPExzDelhQ/exec";
 // ════════════════════════════════════════════════════════════════
 
 const STATUSES = ['New','Site Visit Scheduled','Quoted','Follow-up Due','Won','Lost'];
@@ -882,7 +883,7 @@ async function openPhotos(leadId) {
   setPhotoGridMessage('Loading photos...');
 
   try {
-    const res  = await fetch(SCRIPT_URL + '?action=photos&leadId=' + encodeURIComponent(leadId) + '&leadName=' + encodeURIComponent(currentPhotoLeadName) + '&t=' + Date.now());
+    const res  = await fetch(PHOTO_URL  + '?action=photos&leadId=' + encodeURIComponent(leadId) + '&leadName=' + encodeURIComponent(currentPhotoLeadName) + '&t=' + Date.now());
     const json = await res.json();
     if (!json.ok) throw new Error(json.error);
     currentPhotos  = json.data.photos || [];
@@ -940,7 +941,7 @@ async function uploadFiles(files) {
 
     try {
       const b64  = await fileToBase64(file);
-      const res  = await fetch(SCRIPT_URL + '?t=' + Date.now(), {
+      const res  = await fetch(PHOTO_URL  + '?t=' + Date.now(), {
         method: 'POST',
         body: JSON.stringify({
           action:   'uploadPhoto',
@@ -991,7 +992,7 @@ async function deletePhoto(fileId, e) {
   const thumb = document.getElementById('thumb-' + fileId);
   if (thumb) thumb.style.opacity = '0.4';
   try {
-    const res  = await fetch(SCRIPT_URL + '?t=' + Date.now(), {
+    const res  = await fetch(PHOTO_URL  + '?t=' + Date.now(), {
       method: 'POST',
       body: JSON.stringify({ action: 'deletePhoto', fileId })
     });
